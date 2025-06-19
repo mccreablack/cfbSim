@@ -1,0 +1,103 @@
+from collections import defaultdict, Counter
+import csv  
+
+# Define how many safe slots per position
+underclassmen_slots_raw = [
+    'QB', 'RB', 'WR', 'WR', 'WR', 'OT', 'OT', 'OG', 'OG', 'C', 'TE', 'TE',
+    'FB', 'DL', 'DL', 'DL', 'EDGE', 'EDGE', 'LB', 'LB', 'LB',
+    'CB', 'CB', 'CB', 'S', 'S', 'P', 'K'
+]
+full_roster_slots_raw = [
+    'QB', 'RB', 'WR', 'WR', 'WR', 'OT', 'OT', 'OG', 'OG', 'C', 'TE', 'TE',
+    'FB', 'DL', 'DL', 'DL', 'EDGE', 'EDGE', 'LB', 'LB', 'LB',
+    'CB', 'CB', 'CB', 'S', 'S', 'P', 'K'
+]
+
+# Convert to counts per position
+underclassmen_slots = Counter(underclassmen_slots_raw)
+full_roster_slots = Counter(full_roster_slots_raw)
+
+def trim_roster_to_55(players):
+    players_sorted = sorted(players, key=lambda x: int(x['Overall']), reverse=True)
+
+    underclassmen_filled = defaultdict(int)
+    full_roster_filled = defaultdict(int)
+
+    protected = []
+    unprotected = []
+
+    for player in players_sorted:
+        pos = player['Posistion']
+        age = int(player['Age'])
+
+        protected_here = False
+
+        # Underclassmen protection
+        if age <= 2 and underclassmen_slots[pos] > underclassmen_filled[pos]:
+            protected.append(player)
+            underclassmen_filled[pos] += 1
+            protected_here = True
+
+        # Full roster protection
+        if full_roster_slots[pos] > full_roster_filled[pos]:
+            if age > 2:
+                protected.append(player)
+            full_roster_filled[pos] += 1
+            protected_here = True
+
+        if not protected_here:
+            unprotected.append(player)
+
+    # Trim unprotected down to fit 55 total
+    needed = 55 - len(protected)
+    kept_unprotected = unprotected[:needed]
+    cut_players = unprotected[needed:]
+
+    final_roster = protected + kept_unprotected
+    cut_ids = [p['ID No.'] for p in cut_players]
+
+    return final_roster, cut_players
+
+
+with open("players_active.csv", newline='') as f:
+    reader = csv.DictReader(f)
+    all_players = list(reader)
+
+# Group by school
+school_rosters = defaultdict(list)
+for player in all_players:
+    school_rosters[player['Current School']].append(player)
+
+# Trim rosters
+final_rosters = []
+all_cuts = []
+
+for school, roster in school_rosters.items():
+    trimmed, cuts = trim_roster_to_55(roster)
+    final_rosters.extend(trimmed)
+    all_cuts.extend(cuts)
+
+fieldnames = list(all_players[0].keys())
+
+# Update cut players to show they are in the portal
+for player in all_cuts:
+    player['Current School'] = 'Portal'
+
+all_active_players = final_rosters + all_cuts
+
+with open('players_active.csv', 'w', newline='') as f_out:
+    writer = csv.DictWriter(f_out, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(all_active_players)
+
+#These last two are just for visability/debugging
+
+with open('Post_Trim_Rosters.csv', 'w', newline='') as f_out:
+    writer = csv.DictWriter(f_out, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(final_rosters)
+
+with open('players_cut.csv', 'w', newline='') as f_out:
+    writer = csv.DictWriter(f_out, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(all_cuts)

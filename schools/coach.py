@@ -1,7 +1,8 @@
 # school/coach.py
 
 class Coach:
-    def __init__(self, name, age, archetype, off, deff, off_dev, def_dev, off_rec, def_rec, wins, losses):
+    def __init__(id, self, name, age, archetype, off, deff, off_dev, def_dev, off_rec, def_rec, wins, losses):
+        self.id = id
         self.name = name
         self.age = age
         self.archetype = archetype

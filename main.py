@@ -12,12 +12,23 @@ ad = AthleticDirector("Nancy Sharp", 60, 85, 90)
 #    Player("Isaiah Jones", "RB", 3, 92, 78, 75, 88, 80, 87),
 #]
 
-school = School("State University", hc, oc, dc, ad, 80000, 2000000, players)
+players = [
+    Player("John QB", "QB", 3, 85, 80, 78, 88, 90, 89, 5000, 10, True, 0,0),
+    Player("Sam RB", "RB", 2, 90, 82, 75, 91, 85, 88, 3000, 7, False, 0,0),
+    Player("Mike WR", "WR", 1, 88, 75, 70, 85, 83, 86, 2500, 5, False, 0,0),
+]
 
-print(school.name)  # State University
-print(school.head_coach.name)  # John Smith
-print(school.roster[0].name)   # Drew Adams
+school1 = School("Texas", hc, oc, dc, ad, 80000, 2000000, players, "South", "West")
 
-from game.simulator import simulate_game
+print(school1.name)  # State University
+print(school1.head_coach.name)  # John Smith
+print(school1.roster[0].name)   # Drew Adams
+school2 = School("Alabama", hc, oc, dc, ad, 80000, 2000000, players, "South", "West")
 
-simulate_game("Texas", "Alabama")
+print(school2.name)  # State University
+print(school2.head_coach.name)  # John Smith
+print(school2.roster[0].name)   # Drew Adams
+
+from Game.Simulator import simulate_game
+
+simulate_game(school1, school2)

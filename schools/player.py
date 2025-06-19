@@ -1,7 +1,8 @@
 # school/player.py
 
 class Player:
-    def __init__(self, name, position, hometown, year, speed, strength, tech, agi, intelligence, overall, money, victory, local, playTime):
+    def __init__(id,self, name, position, hometown, year, speed, strength, tech, agi, intelligence, overall, money, victory, local, playTime):
+        self.id = id
         self.name = name
         self.position = position
         self.year = year

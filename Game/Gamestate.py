@@ -16,10 +16,14 @@ class GameState:
         self.clock = 3600  # seconds remaining (60:00)
         self.possession = team1
         self.other_team = team2
+        self.i = 0
+        self.score = [0,0]
+
 
     def switch_possession(self):
         self.offense, self.defense = self.defense, self.offense
         self.possession, self.other_team = self.other_team, self.possession
+        self.i = 1-self.i
         self.down = 1
         self.distance = 10
         self.yardline = 75 - self.yardline  # flip field
@@ -38,7 +42,7 @@ class GameState:
 
         if self.is_touchdown():
             print(f"TOUCHDOWN {self.possession.name}!")
-            self.possession.score += 7
+            self.score[self.i] += 7
             self.switch_possession()
         elif yards_gained >= self.distance:
             print(f"{self.possession.name} got a first down!")
